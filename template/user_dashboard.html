@@ -3,8 +3,27 @@
 {% block content %}
 <div class="content">
     <div class="container mt-5">
-        <h2>User Dashboard</h2>
-        <p>Welcome, {{ request.user.username }}! This is your user dashboard.</p>
+       
+        <p>Welcome, {{ request.user.username }}! .</p>
     </div>
+    <h2>Project Overview</h2>
+    <p>Active Projects: {{ active_projects }}</p>
+    <p>Overdue Projects: {{ overdue_projects }}</p>
+
+    <canvas id="projectStatusChart"></canvas>
+    <script>
+        var ctx = document.getElementById("projectStatusChart").getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: JSON.parse('{{ project_status_labels|escapejs }}'),
+                datasets: [{
+                    label: 'Project Status',
+                    data: JSON.parse('{{ project_status_counts|escapejs }}'),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'], // Example colors
+                }]
+            }
+        });
+    </script>
 </div>
 {% endblock content %}

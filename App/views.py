@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render, redirect, get_object_or_404
+from datetime import date
+import json
 
 def custom_login(request):
     if request.method == 'POST':
@@ -44,10 +46,30 @@ def custom_login(request):
 @never_cache
 @login_required(login_url='login')
 def admin_dashboard(request):
-    return render(request, 'admin_dashboard.html')
+    builders = Builder.objects.all()
+    return render(request, 'admin_dashboard.html', {'builders': builders})
+
+@never_cache
 @login_required(login_url='login')
 def user_dashboard(request):
-    return render(request, 'user_dashboard.html')
+    
+    try:
+        
+        projects = Project.objects.filter(builder__user=request.user)
+        active_projects = projects.filter(status__in=["Planning", "In Progress"])
+        overdue_projects = projects.filter(end_date__lt=date.today(), status="In Progress")
+        status_choices = dict(Project.STATUS_CHOICES)
+        project_status_counts = {status: projects.filter(status=status).count() for status in status_choices.keys()}
+    
+        context = {
+            "active_projects": active_projects.count(),
+            "overdue_projects": overdue_projects.count(),
+            "project_status_labels": json.dumps(list(status_choices.values())),
+            "project_status_counts": json.dumps(list(project_status_counts.values())),
+        }
+    except Builder.DoesNotExist:
+        context = {}
+    return render(request, 'user_dashboard.html', context)
 
 
 def register(request):
@@ -69,6 +91,7 @@ def register(request):
     else:
         form = BuilderRegistrationForm()
     return render(request, 'register.html', {'form': form})
+
 @never_cache
 @login_required(login_url='login')
 def logout_user(request):
@@ -89,8 +112,10 @@ def add_client(request):
             return redirect('/add_client')  
     else:
         form = ClientForm()
-        clients = Client.objects.all()
+        clients = Client.objects.filter(builder__user=request.user)
     return render(request, 'add_client.html', {'form': form,'clients': clients})
+
+
 @never_cache
 @login_required(login_url='login')
 def delete_client(request, client_id):
