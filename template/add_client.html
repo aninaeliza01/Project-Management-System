@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Builder{% endblock %}
+{% block content %}
+<div class="content">
+    <h1>Client List</h1>
+    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addClientModal">Add Client</button>
+    <table class="client-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if clients %}
+            {% for client in clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.email }}</td>
+                    <td>{{ client.phone_number }}</td>
+                    <td>{{ client.address }}</td>
+                    <td>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#updateModal{{ client.id }}">Update</button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ client.id }}">Delete</button>
+                    </td>
+                </tr>
+               <!-- Update Modal -->
+                <div class="modal fade" id="updateModal{{ client.id }}" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateModalLabel">Update Client</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                
+                                <form method="post" action="{% url 'update_client' client.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="client_id" value="{{ client.id }}">
+                                    <div class="form-group">
+                                        <label for="name">Name:</label>
+                                        <input type="text" id="name" name="name" class="form-control" value="{{ client.name }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email:</label>
+                                        <input type="email" id="email" name="email" class="form-control" value="{{ client.email }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone_number">Phone Number:</label>
+                                        <input type="text" id="phone_number" name="phone_number" class="form-control" value="{{ client.phone_number }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="address">Address:</label>
+                                        <input type="text" id="address" name="address" class="form-control" value="{{ client.address }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal{{ client.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete {{ client.name }}?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <a href="{% url 'delete_client' client.id %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No Clients available now.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1" role="dialog" aria-labelledby="addClientModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClientModalLabel">Add Client</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                
+                <form method="post" action="{% url 'add_client' %}" class="client-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Add Client</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

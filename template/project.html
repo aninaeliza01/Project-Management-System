@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Projects{% endblock %}
+{% block content %}
+
+<div class="content">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <h1>Project List</h1>
+    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addProjectModal">Add Project</button>
+    <table class="table table-striped project-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Client</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Budget</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if projects %}
+            {% for project in projects %}
+                <tr>
+                    <td>{{ project.name }}</td>
+                    <td>{{ project.description }}</td>
+                    <td>{{ project.client }}</td>
+                    <td>{{ project.start_date }}</td>
+                    <td>{{ project.end_date }}</td>
+                    <td>{{ project.status }}</td>
+                    <td>{{ project.budget }}</td>
+                    <td>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#updateProjectModal{{ project.id }}">Update</button>
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteProjectModal{{ project.id }}">Delete</button>
+                    </td>
+                </tr>
+                <!-- Update Project Modal -->
+                <div class="modal fade" id="updateProjectModal{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="updateProjectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateProjectModalLabel">Update Project</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'update_project' project.id %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="name">Name:</label>
+                                        <input type="text" id="name" name="name" class="form-control" value="{{ project.name }}" readonly>
+                                        
+                                        
+                                        
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="description">Description:</label>
+                                        <textarea id="description" name="description" class="form-control">{{ project.description }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="client">Client:</label>
+                                        <input type="text" id="client" name="client" value="{{ project.client.name }}" readonly>
+                                        
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="start_date">Start Date:</label>
+                                        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ project.start_date|date:'Y-m-d' }}">
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="end_date">End Date:</label>
+                                        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ project.end_date|date:'Y-m-d' }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="status">Status:</label>
+                                                    <select name="status" id="status" class="form-control">
+                                                    <option value="{{ project.status }}">{{ project.get_status_display }}</option>
+                                                    {% for status, _ in project.get_status_choices %}
+                                                        <option value="{{ status }}">{{ status }}</option>
+                                                    {% endfor %}
+                                                    </select>
+
+                                    </div>                              
+                                                                              
+                                        
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="budget">Budget:</label>
+                                        <input type="number" id="budget" name="budget" class="form-control" value="{{ project.budget }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </form>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Delete Project Modal -->
+                <div class="modal fade" id="deleteProjectModal{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteProjectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteProjectModalLabel">Confirm Delete</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete "{{ project.name }}"?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <a href="{% url 'delete_project' project.id %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No Projects available now.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="addProjectModal" tabindex="-1" role="dialog" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProjectModalLabel">Add Project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'project' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Add Project</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

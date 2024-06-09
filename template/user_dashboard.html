@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Builder{% endblock %}
+{% block content %}
+<div class="content">
+    <div class="container mt-5">
+        <h2>User Dashboard</h2>
+        <p>Welcome, {{ request.user.username }}! This is your user dashboard.</p>
+    </div>
+</div>
+{% endblock content %}
