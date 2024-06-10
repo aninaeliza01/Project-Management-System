@@ -3,27 +3,63 @@
 {% block content %}
 <div class="content">
     <div class="container mt-5">
-       
-        <p>Welcome, {{ request.user.username }}! .</p>
+        <div class="alert alert-primary" role="alert">
+            <p class="mb-0">Welcome, {{ request.user.username }}!</p>
+        </div>
     </div>
-    <h2>Project Overview</h2>
-    <p>Active Projects: {{ active_projects }}</p>
-    <p>Overdue Projects: {{ overdue_projects }}</p>
-
-    <canvas id="projectStatusChart"></canvas>
-    <script>
-        var ctx = document.getElementById("projectStatusChart").getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: JSON.parse('{{ project_status_labels|escapejs }}'),
-                datasets: [{
-                    label: 'Project Status',
-                    data: JSON.parse('{{ project_status_counts|escapejs }}'),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'], // Example colors
-                }]
-            }
-        });
-    </script>
+    <div class="container mt-3">
+        <h2 class="text-center mb-4">Project Overview</h2>
+        <div class="row">
+            
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Overdue Projects</h5>
+                        <p class="card-text">{{ overdue_projects }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Projects</h5>
+                        <p class="card-text">{{ total_projects }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Cost of Projects</h5>
+                        <p class="card-text">₹{{ total_cost }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Projects</h5>
+                        <p class="card-text">{{ pending_projects }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Completed Projects</h5>
+                        <p class="card-text">{{ completed_projects }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">In Progress Projects</h5>
+                        <p class="card-text">{{ in_progress_projects }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock content %}

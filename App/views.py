@@ -49,26 +49,30 @@ def admin_dashboard(request):
     builders = Builder.objects.all()
     return render(request, 'admin_dashboard.html', {'builders': builders})
 
+from django.db.models import Sum
 @never_cache
 @login_required(login_url='login')
-def user_dashboard(request):
+def user_dashboard(request):    
+    projects = Project.objects.filter(builder__user=request.user)
+    overdue_projects = projects.filter(end_date__lt=date.today(), status="In Progress")
+          
     
-    try:
+    total_projects = projects.count()
+    total_cost = projects.aggregate(total_cost=models.Sum('budget'))['total_cost'] or 0
+    
+    pending_projects = projects.filter(status="Planning").count()
+    completed_projects = projects.filter(status="Completed").count()
+    in_progress_projects = projects.filter(status="In Progress").count()
+    
+    context = {
         
-        projects = Project.objects.filter(builder__user=request.user)
-        active_projects = projects.filter(status__in=["Planning", "In Progress"])
-        overdue_projects = projects.filter(end_date__lt=date.today(), status="In Progress")
-        status_choices = dict(Project.STATUS_CHOICES)
-        project_status_counts = {status: projects.filter(status=status).count() for status in status_choices.keys()}
-    
-        context = {
-            "active_projects": active_projects.count(),
-            "overdue_projects": overdue_projects.count(),
-            "project_status_labels": json.dumps(list(status_choices.values())),
-            "project_status_counts": json.dumps(list(project_status_counts.values())),
-        }
-    except Builder.DoesNotExist:
-        context = {}
+        "overdue_projects": overdue_projects.count(),
+        "total_projects": total_projects,
+        "total_cost": total_cost,
+        "pending_projects": pending_projects,
+        "completed_projects": completed_projects,
+        "in_progress_projects": in_progress_projects,
+    }
     return render(request, 'user_dashboard.html', context)
 
 
